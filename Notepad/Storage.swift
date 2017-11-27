@@ -63,8 +63,8 @@ public class Storage: NSTextStorage {
     /// - parameter range:    The range to find attributes for.
     ///
     /// - returns: The attributes on a String within a certain range.
-    override public func attributes(at location: Int, effectiveRange range: NSRangePointer?) -> [NSAttributedStringKey : Any] {
-        return backingStore.attributes(at: location, effectiveRange: range)
+    public override func attributes(at location: Int, effectiveRange range: NSRangePointer?) -> [NSAttributedStringKey : Any] {
+      return backingStore.attributes(at: location, effectiveRange: range) as [NSAttributedStringKey : Any]
     }
 
     /// Replaces edited characters within a certain range with a new string.
@@ -84,7 +84,7 @@ public class Storage: NSTextStorage {
     ///
     /// - parameter attrs: The attributes to add to the string for the range.
     /// - parameter range: The range in which to add attributes.
-    override public func setAttributes(_ attrs: [NSAttributedStringKey : Any]?, range: NSRange) {
+    public override func setAttributes(_ attrs: [NSAttributedStringKey : Any]?, range: NSRange) {
         self.beginEditing()
         backingStore.setAttributes(attrs, range: range)
         self.edited(.editedAttributes, range: range, changeInLength: 0)
@@ -96,7 +96,7 @@ public class Storage: NSTextStorage {
         let backingString = backingStore.string
         let nsRange = backingString.range(from: NSMakeRange(NSMaxRange(editedRange), 0))!
         let indexRange = backingString.lineRange(for: nsRange)
-        let extendedRange: NSRange = NSUnionRange(editedRange, backingString.nsRange(from: indexRange))
+        let extendedRange: NSRange = NSUnionRange(editedRange, backingString.nsRange(from: indexRange)!)
 
         applyStyles(extendedRange)
         super.processEditing()
@@ -109,12 +109,12 @@ public class Storage: NSTextStorage {
         guard let theme = self.theme else { return }
 
         let backingString = backingStore.string
-        backingStore.setAttributes(theme.body.attributes, range: range)
+      backingStore.setAttributes(theme.body.attributes, range: range)
 
         for (style) in theme.styles {
             style.regex.enumerateMatches(in: backingString, options: .withoutAnchoringBounds, range: range, using: { (match, flags, stop) in
                 guard let match = match else { return }
-                backingStore.addAttributes(style.attributes, range: match.range(at: 0))
+              backingStore.addAttributes(style.attributes, range: match.range(at: 0))
             })
         }
     }
